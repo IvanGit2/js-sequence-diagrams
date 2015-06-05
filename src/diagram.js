@@ -26,6 +26,23 @@
 		return actors[ i - 1 ];
 	};
 
+    Diagram.prototype.getTooltip = function(alias) {
+
+        var decodeText = alias.trim().substring(1).replace(/\\n/gm, '\n');
+
+        decodeText = decodeText.replace(/&quot;/g,'"');
+
+        var tooltip;
+        try {
+            tooltip = JSON.stringify( JSON.parse(decodeText), undefined, 4 );
+        } catch(e) {
+            console.log("Warning tooltip text was not JSON: so just display the raw text");
+            tooltip = decodeText;
+        }
+
+        return tooltip;
+    };
+
 	/*
 	 * Parses the input as either a alias, or a "name as alias", and returns the corresponding actor.
 	 */
@@ -45,6 +62,10 @@
 		return this.getActor(alias, name);
 	};
 
+	 Diagram.prototype.getMessage = function(alias) {
+        return alias.trim().substring(1,alias.length-1).replace(/\\n/gm, '\n');
+    };
+
 	Diagram.prototype.setTitle = function(title) {
 		this.title = title;
 	};
@@ -59,13 +80,14 @@
 		this.index = index;
 	};
 
-	Diagram.Signal = function(actorA, signaltype, actorB, message) {
+	Diagram.Signal = function(actorA, signaltype, actorB, message, tooltip) {
 		this.type       = "Signal";
 		this.actorA     = actorA;
 		this.actorB     = actorB;
 		this.linetype   = signaltype & 3;
 		this.arrowtype  = (signaltype >> 2) & 3;
 		this.message    = message;
+        this.tooltip    = tooltip;
 	};
 
 	Diagram.Signal.prototype.isSelf = function() {

@@ -23,12 +23,14 @@
 "note"            return 'note';
 "title"           return 'title';
 ","               return ',';
+^"@"[^#\n]+       return 'TOOLTIP';
+\:[^#\n\:]+\:     return 'MESSAGEWITHTERMINATOR';
+\:[^#\n\:]+       return 'MESSAGE';
 [^\->:,\r\n]+     return 'ACTOR';
 "--"              return 'DOTLINE';
 "-"               return 'LINE';
 ">>"              return 'OPENARROW';
 ">"               return 'ARROW';
-:[^\r\n]+         return 'MESSAGE';
 <<EOF>>           return 'EOF';
 .                 return 'INVALID';
 
@@ -75,8 +77,10 @@ placement
 	;
 
 signal
-	: actor signaltype actor message
-	{ $$ = new Diagram.Signal($1, $2, $3, $4); }
+	: actor signaltype actor messagewithterminator tooltip
+	{ $$ = new Diagram.Signal($1, $2, $3, $4, $5); }
+	| actor signaltype actor message
+          	{ $$ = new Diagram.Signal($1, $2, $3, $4); }
 	;
 
 actor
@@ -102,9 +106,16 @@ arrowtype
 	| OPENARROW { $$ = Diagram.ARROWTYPE.OPEN; }
 	;
 
+messagewithterminator
+    : MESSAGEWITHTERMINATOR { $$ = yy.parser.yy.getMessage($1); }
+    ;
+
 message
 	: MESSAGE { $$ = Diagram.unescape($1.substring(1)); }
 	;
 
+tooltip
+    : TOOLTIP { $$ = yy.parser.yy.getTooltip($1); }
+    ;
 
 %%

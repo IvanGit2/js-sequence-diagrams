@@ -1,3 +1,24 @@
+JS Sequence Diagrams with tooltips
+=============================================
+
+Project setup
+
+    npm install
+    bower install
+
+To compile run in the terminal:
+
+    make
+
+
+In order to use tool tips, append the following to the message section :@Your tooltip.
+
+Example
+-------
+
+    Alice->Bob: Some comment about this connection:@This is the tool tip
+
+
 JS Sequence Diagrams
 =============================================
 **Generates UML sequence diagrams from simple text**  

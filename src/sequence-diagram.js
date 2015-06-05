@@ -469,12 +469,24 @@
 			var aX = getCenterX( signal.actorA );
 			var bX = getCenterX( signal.actorB );
 
+            // Calculate the padding for n number of lines
+            var lines = signal.message.split('\n').length;
+
 			// Mid point between actors
 			var x = (bX - aX) / 2 + aX;
-			var y = offsetY + SIGNAL_MARGIN + 2*SIGNAL_PADDING;
+			var y = offsetY + SIGNAL_MARGIN + 2*SIGNAL_PADDING * lines;
 
 			// Draw the text in the middle of the signal
-			this.draw_text(x, y, signal.message, this._font);
+
+            // Check if message contains a tooltip
+            // if so then create the text that can be rolled over
+            // in order to trigger tooltip
+
+            if (signal.tooltip && signal.tooltip.length>0) {
+                this.drawWithTooltip(x, y, signal.message, signal.tooltip, this._font);
+            } else {
+                this.draw_text(x, y, signal.message, this._font);
+            }
 
 			// Draw the line along the bottom of the signal
 			y = offsetY + signal.height - SIGNAL_MARGIN - SIGNAL_PADDING;
@@ -540,6 +552,94 @@
 
 			t.toFront();
 		},
+
+        drawWithTooltip : function (x, y, text, tooltipText, font) {
+            var paper = this._paper;
+            var group = this._paper.set();
+            var f = font || {};
+            var t;
+
+            var tooltip;
+            var tooltipBackground;
+            var toolTipGroup;
+            var toolTipVisible = false;
+
+            if (f._obj) {
+                t = paper.print_center(x, y, text, f._obj, f['font-size']);
+            } else {
+                t = paper.text(x, y, text);
+                t.attr(f);
+            }
+
+            t.attr({'fill': '#0000ff'});
+
+            // draw a rect behind it
+            var bb = t.getBBox();
+            var r = paper.rect(bb.x, bb.y, bb.width, bb.height);
+            r.attr({'fill': '#000', 'fill-opacity': 0, 'stroke': 'none'});
+            group.attr({'fill': "#ffffff", 'stroke': 'none'});
+
+
+            r.toFront();
+            group.push(t);
+            group.push(r);
+
+            r.node.onclick = function() {
+
+                if (!toolTipVisible) {
+                    toolTipVisible = true;
+                    group.attr({'cursor': 'default'});
+
+
+                    if (f._obj) {
+                        tooltip = paper.print_center(x, y, tooltipText, f._obj, f['font-size']);
+                    } else {
+                        tooltip = paper.text(x, y, tooltipText);
+                        tooltip.attr(f);
+                    }
+                    // Left align the tooltip text
+                    tooltip.attr( { 'text-anchor':'start' });
+
+                    bb = tooltip.getBBox();
+                    tooltipBackground = paper.rect(bb.x-10, bb.y-10, bb.width+20, bb.height+20);
+                    tooltipBackground.attr({'fill': '#ffff99', 'stroke': '#e6b800', 'stroke-width': 0.5});
+
+                    var glow = tooltipBackground.glow({
+                        width:10,
+                        fill:true,
+                        offsetx :4,
+                        offsety:4,
+                        color:'grey',
+                        opacity:0.15
+                    });
+
+                    toolTipGroup = paper.set();
+
+
+                    toolTipGroup.push(tooltipBackground);
+                    toolTipGroup.push(tooltip);
+                    tooltip.toFront();
+
+
+                    tooltipBackground.node.onclick = function() {
+                        toolTipVisible = false;
+                        tooltip.remove();
+                        tooltipBackground.remove();
+                        toolTipGroup.remove();
+                        glow.remove();
+                        group.attr({'cursor': 'pointer'});
+                    };
+
+                    toolTipGroup.attr({
+                        'cursor': 'pointer'
+                    });
+                }
+            };
+
+
+            group.attr({'cursor': 'pointer'});
+
+        },
 
 		draw_text_box : function (box, text, margin, padding, font) {
 			var x = box.x + margin;
