@@ -24,7 +24,7 @@
 "title"           return 'title';
 ","               return ',';
 ^"@"[^#\n]+       return 'TOOLTIP';
-\:[^#\n\:]+\:     return 'MESSAGEWITHTERMINATOR';
+\:[^#\n\:]+\!     return 'MESSAGEWITHTERMINATOR';
 \:[^#\n\:]+       return 'MESSAGE';
 [^\->:,\r\n]+     return 'ACTOR';
 "--"              return 'DOTLINE';
