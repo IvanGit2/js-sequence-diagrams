@@ -25,7 +25,8 @@
 	var SIGNAL_MARGIN  = 5; // Margin around a signal
 	var SIGNAL_PADDING = 5; // Padding inside a signal
 
-	var NOTE_MARGIN   = 10; // Margin around a note
+	var NOTE_Y_OFFSET = -10;
+	var NOTE_MARGIN   = 5; // Margin around a note
 	var NOTE_PADDING  = 5; // Padding inside a note
 	var NOTE_OVERLAP  = 15; // Overlap when using a "note over A,B"
 
@@ -427,7 +428,7 @@
 					}
 
 				} else if (s.type == "Note") {
-					this.draw_note(s, y);
+					this.draw_note(s, y + NOTE_Y_OFFSET);
 				}
 
 				y += s.height;
